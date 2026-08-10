@@ -97,7 +97,19 @@
 
 ## 效果展示
 
-（待补充：手表实拍 / 小程序截图 / 演示视频）
+手表实拍 + 小程序界面截图（共 34 张，按 1→34 顺序展示）：
+
+| 1 | 2 | 3 | 4 |
+| --- | --- | --- | --- |
+| <img src="项目成果/1.jpg" width="220" alt="1"/> | <img src="项目成果/2.jpg" width="220" alt="2"/> | <img src="项目成果/3.jpg" width="220" alt="3"/> | <img src="项目成果/4.jpg" width="220" alt="4"/> |
+| <img src="项目成果/5.jpg" width="220" alt="5"/> | <img src="项目成果/6.jpg" width="220" alt="6"/> | <img src="项目成果/7.jpg" width="220" alt="7"/> | <img src="项目成果/8.jpg" width="220" alt="8"/> |
+| <img src="项目成果/9.jpg" width="220" alt="9"/> | <img src="项目成果/10.jpg" width="220" alt="10"/> | <img src="项目成果/11.jpg" width="220" alt="11"/> | <img src="项目成果/12.jpg" width="220" alt="12"/> |
+| <img src="项目成果/13.jpg" width="220" alt="13"/> | <img src="项目成果/14.jpg" width="220" alt="14"/> | <img src="项目成果/15.jpg" width="220" alt="15"/> | <img src="项目成果/16.jpg" width="220" alt="16"/> |
+| <img src="项目成果/17.jpg" width="220" alt="17"/> | <img src="项目成果/18.jpg" width="220" alt="18"/> | <img src="项目成果/19.jpg" width="220" alt="19"/> | <img src="项目成果/20.jpg" width="220" alt="20"/> |
+| <img src="项目成果/21.jpg" width="220" alt="21"/> | <img src="项目成果/22.jpg" width="220" alt="22"/> | <img src="项目成果/23.jpg" width="220" alt="23"/> | <img src="项目成果/24.png" width="220" alt="24"/> |
+| <img src="项目成果/25.png" width="220" alt="25"/> | <img src="项目成果/26.png" width="220" alt="26"/> | <img src="项目成果/27.png" width="220" alt="27"/> | <img src="项目成果/28.png" width="220" alt="28"/> |
+| <img src="项目成果/29.png" width="220" alt="29"/> | <img src="项目成果/30.png" width="220" alt="30"/> | <img src="项目成果/31.png" width="220" alt="31"/> | <img src="项目成果/32.png" width="220" alt="32"/> |
+| <img src="项目成果/33.png" width="220" alt="33"/> | <img src="项目成果/34.png" width="220" alt="34"/> |
 
 ## License
 
