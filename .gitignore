@@ -1,0 +1,19 @@
+﻿# ===== PlatformIO 构建产物 =====
+.pio/
+build/
+libdeps/
+*.o
+*.elf
+*.map
+
+# ===== VS Code =====
+.vscode/
+
+# ===== 微信开发者工具 =====
+project.private.config.json
+miniprogram_npm/
+
+# ===== 系统/编辑器 =====
+.DS_Store
+Thumbs.db
+*.log

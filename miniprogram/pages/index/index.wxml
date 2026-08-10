@@ -1,0 +1,74 @@
+<!-- pages/index/index.wxml - 首页（v29c 视觉升级） -->
+<view class="container">
+
+  <!-- 实时概览卡片 -->
+  <view class="card">
+    <view class="card-head">
+      <view class="card-title">实时数据</view>
+      <view wx:if="{{!loading && !noData}}" class="update-time">{{summary.time}}</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="tip">加载中...</view>
+    <view wx:elif="{{noData}}" class="tip">暂无数据。请确认云函数已部署并触发</view>
+    <view wx:else class="grid">
+      <view class="cell">
+        <view class="cell-icon ic-amber">🌡️</view>
+        <view class="cell-v">{{summary.temp}}<text class="unit">℃</text></view>
+        <view class="cell-k">温度</view>
+      </view>
+      <view class="cell">
+        <view class="cell-icon ic-cyan">💧</view>
+        <view class="cell-v">{{summary.hum}}<text class="unit">%</text></view>
+        <view class="cell-k">湿度</view>
+      </view>
+      <view class="cell">
+        <view class="cell-icon ic-violet">⛅</view>
+        <view class="cell-v">{{summary.press}}<text class="unit">hPa</text></view>
+        <view class="cell-k">气压</view>
+      </view>
+      <view class="cell">
+        <view class="cell-icon ic-coral">❤️</view>
+        <view class="cell-v">{{summary.bpm}}<text class="unit">次/分</text></view>
+        <view class="cell-k">心率</view>
+      </view>
+      <view class="cell">
+        <view class="cell-icon ic-green">O₂</view>
+        <view class="cell-v">{{summary.spo2}}<text class="unit">%</text></view>
+        <view class="cell-k">血氧</view>
+      </view>
+      <view class="cell">
+        <view class="cell-icon ic-amber">☀️</view>
+        <view class="cell-v">{{summary.uv}}<text class="unit"></text></view>
+        <view class="cell-k">紫外线</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能入口 -->
+  <view class="entry" bindtap="goHealth">
+    <view class="entry-icon ec-blue">♥</view>
+    <view class="entry-text">
+      <view class="entry-title">健康报表</view>
+      <view class="entry-desc">温度/湿度/气压/心率/血氧/紫外线趋势</view>
+    </view>
+    <view class="entry-arrow">›</view>
+  </view>
+
+  <view class="entry" bindtap="goSport">
+    <view class="entry-icon ec-green">🏃</view>
+    <view class="entry-text">
+      <view class="entry-title">运动</view>
+      <view class="entry-desc">步数/距离/卡路里趋势</view>
+    </view>
+    <view class="entry-arrow">›</view>
+  </view>
+
+  <view class="entry" bindtap="goWatchface">
+    <view class="entry-icon ec-purple">🖼️</view>
+    <view class="entry-text">
+      <view class="entry-title">表盘设置</view>
+      <view class="entry-desc">上传图片当手表背景</view>
+    </view>
+    <view class="entry-arrow">›</view>
+  </view>
+</view>

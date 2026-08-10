@@ -1,0 +1,9 @@
+{
+  "name": "collectSensorData",
+  "version": "1.0.0",
+  "description": "定时采集 T-Watch 传感器数据到云数据库",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

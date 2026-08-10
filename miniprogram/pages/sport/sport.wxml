@@ -1,0 +1,51 @@
+<!-- pages/sport/sport.wxml - 运动：今日总览 + 24小时 + 最近7天 -->
+<view class="container sport-page">
+
+  <!-- 今日总览卡 -->
+  <view class="card overview-card" wx:if="{{!empty}}">
+    <view class="ov-head">
+      <view class="ov-date">{{dateText}} 今日</view>
+      <view class="ov-goal">目标 {{goal}} 步</view>
+    </view>
+    <view class="ov-main">
+      <view class="ov-left">
+        <view class="ov-progress-track"><view class="ov-progress-bar" style="width:{{goalPercent}}%"></view></view>
+        <view class="ov-steps"><text class="ov-steps-num">{{totalSteps}}</text><text class="ov-steps-unit">步</text></view>
+        <view class="ov-tip">已完成 {{goalPercent}}% 目标</view>
+      </view>
+      <view class="ov-sub">
+        <view class="ov-sub-item">
+          <view class="ov-sub-ic ic-blue">📏</view>
+          <text class="ov-sub-v">{{dist}}</text><text class="ov-sub-u">m</text>
+          <text class="ov-sub-l">距离</text>
+        </view>
+        <view class="ov-sub-item">
+          <view class="ov-sub-ic ic-orange">🔥</view>
+          <text class="ov-sub-v">{{cal}}</text><text class="ov-sub-u">kcal</text>
+          <text class="ov-sub-l">卡路里</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 24 小时柱状图卡 -->
+  <view class="card chart-card">
+    <view class="chart-head">
+      <view class="chart-title">24 小时步数分布</view>
+      <view wx:if="{{!loading && !empty}}" class="count">{{countText}}</view>
+    </view>
+    <canvas type="2d" id="chart" class="chart chart-tall"></canvas>
+    <view wx:if="{{loading}}" class="tip">加载中...</view>
+    <view wx:elif="{{empty}}" class="tip">暂无运动数据</view>
+    <view class="chart-note" wx:if="{{!empty}}">柱子 = 该小时新走步数（5 点 28 步、6 点没走则 6 点为 0）</view>
+  </view>
+
+  <!-- 最近 7 天卡 -->
+  <view class="card chart-card">
+    <view class="chart-head">
+      <view class="chart-title">最近 7 天步数</view>
+      <view wx:if="{{!empty}}" class="count">今天高亮</view>
+    </view>
+    <canvas type="2d" id="chart7" class="chart"></canvas>
+  </view>
+</view>

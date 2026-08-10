@@ -1,0 +1,29 @@
+<!-- pages/watchface/watchface.wxml - 表盘设置（v29c 视觉升级） -->
+<view class="container">
+  <view class="card">
+    <view class="card-title">表盘背景</view>
+    <view class="desc">选择一张图片，自动裁剪压缩为 240×240，作为手表数字表盘的背景。发送后请保持手表开机联网。</view>
+
+    <!-- 预览 -->
+    <view class="preview" bindtap="onChooseImage">
+      <image wx:if="{{preview}}" src="{{preview}}" mode="aspectFill" class="preview-img" />
+      <view wx:else class="preview-empty">
+        <view class="preview-plus">＋</view>
+        <view class="preview-text">点击选择图片</view>
+      </view>
+    </view>
+
+    <!-- 操作 -->
+    <view class="row">
+      <button class="btn" size="mini" bindtap="onChooseImage">重新选择</button>
+      <button class="btn btn-primary" size="mini" disabled="{{!ready || sending}}" bindtap="onUpload">{{sending ? '处理中...' : '上传并设置'}}</button>
+    </view>
+
+    <!-- 状态 -->
+    <view wx:if="{{status}}" class="status {{statusType === 'err' ? 'status-err' : 'status-ok'}}">{{status}}</view>
+    <view wx:if="{{lastAt}}" class="last-at">上次下发：{{lastAt}}</view>
+  </view>
+
+  <!-- 压缩用的隐藏画布 -->
+  <canvas canvas-id="wallpaperCanvas" class="hidden-canvas" style="width:240px;height:240px;"></canvas>
+</view>

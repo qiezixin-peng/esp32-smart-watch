@@ -1,0 +1,35 @@
+/* pages/health/health.wxss - v29d 白色适配 */
+.metric-bar { display: flex; flex-wrap: wrap; margin-bottom: 24rpx; }
+.metric {
+  padding: 12rpx 30rpx;
+  margin: 8rpx;
+  border-radius: 36rpx;
+  background: #f2f5fa;
+  border: 1rpx solid rgba(28, 40, 70, 0.06);
+  color: #7a8499;
+  font-size: 26rpx;
+}
+.metric-active {
+  background: linear-gradient(135deg, #5b8cff 0%, #3ddbd6 100%);
+  border-color: transparent;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 8rpx 22rpx rgba(77, 146, 255, 0.26);
+}
+
+.latest-card { text-align: center; padding: 36rpx 32rpx; }
+.latest-label { color: #7a8499; font-size: 24rpx; }
+.latest-wrap { display: flex; align-items: baseline; justify-content: center; margin-top: 12rpx; }
+.latest-v {
+  font-size: 76rpx;
+  font-weight: 700;
+  color: #1c2333;
+  text-shadow: 0 0 26rpx rgba(93, 140, 255, 0.16);
+}
+.latest-unit { font-size: 28rpx; color: #7a8499; margin-left: 10rpx; }
+
+.chart-card { padding: 28rpx 24rpx 24rpx; }
+.chart-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16rpx; }
+.chart-title { font-size: 28rpx; font-weight: 600; color: #1c2333; }
+.count { font-size: 22rpx; color: #7a8499; }
+.chart { width: 100%; height: 460rpx; }

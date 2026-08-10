@@ -1,0 +1,9 @@
+{
+  "name": "sendWallpaper",
+  "version": "1.0.0",
+  "description": "将表盘背景图 URL 下发给手表",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,46 @@
+/* pages/sport/sport.wxss - 运动：今日总览 + 24h + 7天 */
+.sport-page { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* 今日总览卡 */
+.overview-card { padding: 32rpx; }
+.ov-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26rpx; }
+.ov-date { font-size: 28rpx; font-weight: 700; color: #1c2333; }
+.ov-goal { font-size: 22rpx; color: #9aa3b5; background: #eef2f8; padding: 6rpx 18rpx; border-radius: 24rpx; }
+
+.ov-main { display: flex; align-items: center; }
+.ov-left { flex: 0 0 46%; text-align: center; }
+.ov-progress-track {
+  width: 180rpx; height: 18rpx; border-radius: 10rpx;
+  background: #edf1f7; margin: 0 auto 18rpx; overflow: hidden;
+}
+.ov-progress-bar {
+  height: 100%; border-radius: 10rpx;
+  background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+  transition: width 0.4s ease;
+}
+.ov-steps-num { font-size: 84rpx; font-weight: 800; color: #1c2333; line-height: 1; }
+.ov-steps-unit { font-size: 26rpx; color: #9aa3b5; margin-left: 8rpx; }
+.ov-tip { font-size: 22rpx; color: #10b981; margin-top: 12rpx; }
+
+.ov-sub { flex: 1; display: flex; justify-content: space-around; }
+.ov-sub-item { display: flex; flex-direction: column; align-items: center; }
+.ov-sub-ic {
+  width: 72rpx; height: 72rpx; border-radius: 22rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36rpx; margin-bottom: 10rpx;
+  box-shadow: 0 8rpx 20rpx rgba(28, 48, 100, 0.12);
+}
+.ic-blue { background: linear-gradient(135deg, #4fb8ff, #3ddbd6); }
+.ic-orange { background: linear-gradient(135deg, #ffb454, #ff8a5c); }
+.ov-sub-v { font-size: 42rpx; font-weight: 700; color: #1c2333; }
+.ov-sub-u { font-size: 20rpx; color: #9aa3b5; }
+.ov-sub-l { font-size: 22rpx; color: #7a8499; margin-top: 4rpx; }
+
+/* 柱状图卡 */
+.chart-card { padding: 28rpx 24rpx 24rpx; flex: 1; }
+.chart-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16rpx; }
+.chart-title { font-size: 28rpx; font-weight: 600; color: #1c2333; }
+.count { font-size: 22rpx; color: #7a8499; }
+.chart { width: 100%; height: 360rpx; }
+.chart-tall { height: 460rpx; }
+.chart-note { color: #9aa3b5; font-size: 22rpx; padding: 14rpx 4rpx 0; line-height: 1.6; }
