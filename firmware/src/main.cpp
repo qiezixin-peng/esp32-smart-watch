@@ -99,6 +99,37 @@ volatile bool haveSensorData = false;
 int sensorRxCount = 0;
 volatile bool pendingBuzz = false;
 volatile bool healthDirty = false;
+
+// ===== 健康阈值告警（心率/血氧异常 → 本地震动+屏显 + 云平台/小程序同步预警）=====
+// healthAlarm：当前是否处于告警状态（1=异常，0=正常）；healthAlarmDirty：告警状态刚变化，需要屏显提示 + 立即上报
+#define HR_HIGH_THRESH   150     // 心率过高阈值（bpm）
+#define HR_LOW_THRESH    40      // 心率过低阈值（bpm）
+#define SPO2_LOW_THRESH  90      // 血氧过低阈值（%）
+bool healthAlarm = false;
+volatile bool healthAlarmDirty = false;
+static int  healthBadCnt = 0;     // 连续超阈值次数（防抖：连续 2 次才算告警）
+static int  healthGoodCnt = 0;    // 连续正常次数（防抖：连续 2 次才解除）
+#define HEALTH_CONFIRM_CNT 2      // 连续确认次数
+
+// 作用：根据最新心率/血氧判断是否触发健康告警（每收到一次 BLE 数据调用一次）
+// 规则：HR>150 或 HR<40 或 SpO2<90 视为异常；连续 HEALTH_CONFIRM_CNT 次异常才真正告警（防传感器瞬时抖动）
+//       连续 HEALTH_CONFIRM_CNT 次正常才解除。状态变化时置 healthAlarmDirty 供主循环屏显 + 立即上报
+void updateHealthAlarm() {
+    bool bad = (sensorBpm > HR_HIGH_THRESH) || (sensorBpm < HR_LOW_THRESH && sensorBpm > 0) || (sensorSpo2 < SPO2_LOW_THRESH && sensorSpo2 > 0);
+    if (bad) {
+        healthBadCnt++; healthGoodCnt = 0;
+        if (healthBadCnt >= HEALTH_CONFIRM_CNT && !healthAlarm) {
+            healthAlarm = true; healthAlarmDirty = true; healthBadCnt = 0;
+            Serial.printf("[ALARM] ON  HR=%.0f SpO2=%.0f\n", sensorBpm, sensorSpo2);
+        }
+    } else {
+        healthGoodCnt++; healthBadCnt = 0;
+        if (healthGoodCnt >= HEALTH_CONFIRM_CNT && healthAlarm) {
+            healthAlarm = false; healthAlarmDirty = true; healthGoodCnt = 0;
+            Serial.printf("[ALARM] OFF HR=%.0f SpO2=%.0f\n", sensorBpm, sensorSpo2);
+        }
+    }
+}
 // 亮屏通知卡片（亮屏时来消息：震动 + 卡片覆盖 3 秒，到期/触摸后恢复原页面）
 // 亮屏通知卡片（亮屏时来消息：震动 + 卡片覆盖 3 秒，到期/触摸后恢复原页面）
 // notifyLight/notifyUntil：息屏时的通知卡片（亮屏显示 3 秒后自动灭屏）
@@ -107,6 +138,15 @@ static int  notifyCardPrevPage = 0;
 static unsigned long notifyCardUntil = 0;
 static bool notifyLight = false;          // 息屏通知卡片显示中（文件级，亮屏分支共用）
 static unsigned long notifyUntil = 0;     // 息屏卡片结束时间
+
+// ===== 健康告警卡片（心率/血氧异常时全屏红卡提醒，3 秒后自动恢复）=====
+// healthAlertActive：告警卡显示中；healthAlertUntil：到期时间；healthAlertWasSleep：触发前是否息屏（到期恢复用）
+// healthAlertPrevMode/Page：触发前页面（到期后恢复原界面）
+static bool  healthAlertActive = false;
+static unsigned long healthAlertUntil = 0;
+static bool  healthAlertWasSleep = false;
+static int   healthAlertPrevMode = 0;
+static int   healthAlertPrevPage = 0;
 
 // ===== BLE 连接状态（连接 C3 传感器手环，接收实时数据）=====
 // doConnect：扫描到目标后置位请求连接；doScan：是否继续扫描；pRemoteCharacteristic：通知特征
@@ -153,6 +193,8 @@ static void notifyCallback(BLERemoteCharacteristic*, uint8_t* pData, size_t len,
     p=strstr(buf,"\"uv\":");    if(p) sensorUv=atof(p+5);
     // 标记"收到过数据"，健康页靠它区分"有数据/无数据"
     haveSensorData = true;
+    // 健康阈值告警判断：仅当心率或血氧有有效读数时评估（0 = 未测到，跳过避免误报）
+    if (sensorBpm > 0 || sensorSpo2 > 0) updateHealthAlarm();
     // 仅当正在健康页时：计数 + 请求震动 + 标记刷新（其他页面收到数据只更新变量，不打扰用户）
     if (sysMode == MODE_APPS && currentPage == PAGE_HEALTH) { sensorRxCount++; pendingBuzz = true; healthDirty = true; }
     Serial.printf("[BLE RX#%d] t=%.1f h=%.0f p=%.0f bpm=%.0f spo2=%.0f uv=%.0f\n", sensorRxCount, sensorTemp, sensorHum, sensorPress, sensorBpm, sensorSpo2, sensorUv);
@@ -320,6 +362,47 @@ static void drawNotifyCard(const NotifyItem& nit) {
     tft.drawString("\u53cc\u51fb\u8fdb\u5165\u901a\u77e5", 66, 130);
 }
 
+// 健康告警卡绘制（心率/血氧异常时全屏红卡，显示当前异常值）
+// 作用：画红色告警卡，提醒监护人/佩戴者当前心率或血氧超阈值
+static void drawHealthAlertCard() {
+    char buf[40];
+    tft.unloadFont();
+    tft.fillScreen(TFT_BLACK);
+    tft.loadFont(font_vlw);
+    tft.setTextSize(1);
+    tft.drawRoundRect(24, 34, 192, 150, 8, TFT_RED);
+    tft.fillRoundRect(24, 34, 192, 150, 8, 0x5000);   // 深红底
+    tft.drawRoundRect(24, 34, 192, 150, 8, TFT_RED);
+    tft.setTextColor(TFT_RED, 0x5000);
+    tft.drawString("\u2764 \u5fc3\u7387/\u8840\u6c27\u5f02\u5e38", 44, 52);
+    tft.setTextColor(TFT_WHITE, 0x5000);
+    snprintf(buf, sizeof(buf), "HR  %.0f bpm", sensorBpm);
+    tft.drawString(buf, 60, 92);
+    snprintf(buf, sizeof(buf), "SpO2 %.0f %%", sensorSpo2);
+    tft.drawString(buf, 60, 122);
+    tft.setTextColor(TFT_DARKGREY, 0x5000);
+    tft.drawString("\u89e6\u6478\u53d6\u6d88", 88, 160);
+}
+
+// 健康告警卡关闭：恢复触发前的界面（息屏→灭屏 / 表盘→重绘表盘 / 应用页→回原页）
+// 作用：告警卡到期或触摸取消后，把屏幕恢复到显示告警前的状态
+static void dismissHealthAlertCard() {
+    if (healthAlertWasSleep) {
+        prevPageBeforeSleep = (sysMode == MODE_APPS) ? currentPage : -1;
+        prevModeBeforeSleep = sysMode;
+        screenOff();
+    } else if (healthAlertPrevMode == MODE_WATCHFACE) {
+        tft.unloadFont();
+        tft.fillScreen(TFT_BLACK);
+        wf_invalidateCache();
+    } else {
+        currentPage = healthAlertPrevPage;
+        sysMode = MODE_APPS;
+        tft.loadFont(font_vlw);
+        drawMainScreen();
+    }
+}
+
 // ===== loop()：主循环（每帧多次执行）=====
 // 职责：表盘/应用页渲染、触摸手势切页、自动息屏与抬手/双击唤醒、
 //       BLE/WiFi/MQTT 联网保活、全局计步、天气周期刷新、闹钟响铃
@@ -357,10 +440,51 @@ void loop() {
     // ===== 全局计步 =====
     // 放在循环最前面、每帧都调用：任何页面（甚至息屏）都持续累计步数（v29z 起从运动页移到这里）
 
+    // ===== 健康告警事件（心率/血氧超阈值或恢复正常，BLE 回调置 healthAlarmDirty）=====
+    // 放在自动息屏之前：无论息屏/亮屏、哪个页面，告警都要立刻震动 + 亮屏弹卡 + 立即上报
+    if (healthAlarmDirty) {
+        healthAlarmDirty = false;
+        if (healthAlarm) {
+            // 1) 本地长震动提醒（200ms，区别于普通通知的 50-80ms）
+            buzz(200);
+            // 2) 息屏则先亮屏（LCD SLEEP OUT 唤醒，与通知卡一致）
+            bool wasOff = isScreenOff();
+            if (wasOff) {
+                screenOn();
+                tft.writecommand(0x11); delay(120);
+            }
+            // 3) 弹健康告警卡（避免与通知卡/下拉面板叠加，先清理相关状态）
+            if (!healthAlertActive) {
+                notifyLight = false; notifyCardActive = false; pullDownActive = false;
+                healthAlertWasSleep = wasOff;
+                healthAlertPrevMode = sysMode;
+                healthAlertPrevPage = currentPage;
+                drawHealthAlertCard();
+                healthAlertActive = true;
+                healthAlertUntil = millis() + 3000;
+            }
+            // 4) 立即上报云平台（payload 带 alarm=1；不等 40s 周期）
+            if (mqttOk) publishSensorData();
+            Serial.printf("[ALARM] Trigger card HR=%.0f SpO2=%.0f\n", sensorBpm, sensorSpo2);
+            delay(20);
+            return;   // 弹卡后本帧结束，避免后续绘制覆盖卡片
+        } else {
+            // 恢复正常：关掉告警卡，恢复到触发前界面
+            if (healthAlertActive) {
+                healthAlertActive = false;
+                dismissHealthAlertCard();
+            }
+            if (mqttOk) publishSensorData();   // 上报 alarm=0，让小程序解除预警
+            Serial.println("[ALARM] Recovered");
+            delay(20);
+            return;
+        }
+    }
+
     // ====== 自动息屏（30s 无触摸，开关打开时）======
     // ====== 自动息屏：30 秒无操作就灭屏（开关在下拉面板，可关闭）======
     if (!isScreenOff() && autoSleepEnabled() && !clock_isRinging()
-        && !notifyLight && !notifyCardActive    // 通知卡片显示中不自动息屏
+        && !notifyLight && !notifyCardActive && !healthAlertActive   // 通知卡/健康告警卡显示中不自动息屏
         && (now - gLastTouchMs >= 30000)) {
         prevPageBeforeSleep = (sysMode == MODE_APPS) ? currentPage : -1;   // v29j: 记录息屏前页面（唤醒后先表盘，左滑返回）
         prevModeBeforeSleep = sysMode;
@@ -577,7 +701,7 @@ void loop() {
         notifyTakeNew();
         NotifyItem nit;
         bool got = notifyGet(0, &nit);
-        if (got && !notifyLight && !notifyCardActive) {   // 卡片显示中不重复弹
+        if (got && !notifyLight && !notifyCardActive && !healthAlertActive) {   // 卡片显示中不重复弹（健康告警卡显示中也不叠加）
             buzz(50);
             notifyCardPrevPage = currentPage;
             drawNotifyCard(nit);
@@ -661,6 +785,37 @@ void loop() {
             delay(20);
             return;
         }
+    }
+
+    // ===== 健康告警卡显示中：统一处理（到期自动恢复 / 触摸任意处取消）=====
+    // 与通知卡并列：告警卡 3 秒到期自动恢复触发前界面；期间任意触摸提前关闭
+    if (healthAlertActive) {
+        if (now >= healthAlertUntil) {
+            healthAlertActive = false;
+            dismissHealthAlertCard();
+            Serial.println("[ALARM] Card timeout -> restore");
+            delay(20);
+            return;
+        }
+        if (touchAvailable) {
+            uint16_t ax, ay;
+            int ag = getGesture(&ax, &ay);
+            if (ag != GESTURE_NONE) {
+                buzz(30);
+                healthAlertActive = false;
+                dismissHealthAlertCard();
+                Serial.println("[ALARM] Card dismissed by touch");
+                delay(20);
+                return;
+            }
+        }
+        // 告警卡显示中保持 MQTT 维护，不进入页面绘制（避免覆盖卡片）
+        if (wifiOk) {
+            if (mqtt.connected()) { mqtt.loop(); }
+            else { connectMQTT(); }
+        }
+        delay(20);
+        return;
     }
 
     // ====== 模式A：全屏表盘 ======

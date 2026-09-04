@@ -1,6 +1,15 @@
 <!-- pages/index/index.wxml - 首页（v29c 视觉升级） -->
 <view class="container">
 
+  <!-- 心率/血氧异常预警条（手表端检测到超阈值 → 云平台 alarm=1 → 小程序同步弹预警） -->
+  <view wx:if="{{alarm && !loading && !noData}}" class="alarm-bar">
+    <view class="alarm-icon">⚠️</view>
+    <view class="alarm-text">
+      <view class="alarm-title">心率/血氧异常提醒</view>
+      <view class="alarm-desc">当前心率 {{summary.bpm}} 次/分 · 血氧 {{summary.spo2}}%，请及时查看</view>
+    </view>
+  </view>
+
   <!-- 实时概览卡片 -->
   <view class="card">
     <view class="card-head">

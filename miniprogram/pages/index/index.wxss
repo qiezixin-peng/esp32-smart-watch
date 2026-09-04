@@ -1,4 +1,24 @@
 /* pages/index/index.wxss - v29e 边界清晰 */
+/* 心率/血氧异常预警条（红色，突出显示） */
+.alarm-bar {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #ff5f6d, #ff3d4e);
+  border-radius: 24rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 22rpx;
+  box-shadow: 0 12rpx 36rpx rgba(255, 61, 78, 0.30);
+  animation: alarm-blink 1.2s ease-in-out infinite;
+}
+.alarm-icon { font-size: 44rpx; margin-right: 22rpx; }
+.alarm-text { flex: 1; }
+.alarm-title { font-size: 30rpx; font-weight: 700; color: #ffffff; }
+.alarm-desc { font-size: 22rpx; color: rgba(255, 255, 255, 0.92); margin-top: 6rpx; }
+@keyframes alarm-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
 .card-head { display: flex; align-items: center; justify-content: space-between; }
 .update-time {
   font-size: 22rpx;

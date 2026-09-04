@@ -53,6 +53,7 @@ exports.main = async (event, context) => {
       bpm: a.bpm != null ? Number(a.bpm) : null,
       spo2: a.spo2 != null ? Number(a.spo2) : null,
       uv: a.uv != null ? Number(a.uv) : null,
+      alarm: a.alarm != null ? Number(a.alarm) : 0,
       rssi: a.rssi != null ? Number(a.rssi) : null,
       uptime: a.uptime != null ? Number(a.uptime) : null,
       online: a.online != null ? Number(a.online) : null,

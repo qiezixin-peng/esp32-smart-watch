@@ -16,6 +16,7 @@ extern float sensorTemp, sensorHum, sensorPress;
 extern float sensorBpm, sensorSpo2, sensorUv;
 extern bool  haveSensorData;
 extern int   seconds;
+extern bool  healthAlarm;      // 健康阈值告警状态（main.cpp 定义，心率/血氧异常时为 true）
 // 运动数据（定义在 sport.cpp，经 sport.h 导出）
 extern uint32_t sportSteps;
 extern float    sportDistanceKm;
@@ -62,8 +63,8 @@ void publishSensorData() {
     char json[256];
     // 组装 JSON：温湿度/气压/心率/血氧/UV + 信号强度/运行秒数/运动数据
     snprintf(json, sizeof(json),
-        "{\"temp\":%.1f,\"hum\":%.0f,\"press\":%.0f,\"bpm\":%.0f,\"spo2\":%.0f,\"uv\":%.0f,\"rssi\":%d,\"uptime\":%d,\"steps\":%u,\"dist\":%.1f,\"cal\":%.1f}",
-        sensorTemp, sensorHum, sensorPress, sensorBpm, sensorSpo2, sensorUv, WiFi.RSSI(), seconds,
+        "{\"temp\":%.1f,\"hum\":%.0f,\"press\":%.0f,\"bpm\":%.0f,\"spo2\":%.0f,\"uv\":%.0f,\"alarm\":%d,\"rssi\":%d,\"uptime\":%d,\"steps\":%u,\"dist\":%.1f,\"cal\":%.1f}",
+        sensorTemp, sensorHum, sensorPress, sensorBpm, sensorSpo2, sensorUv, healthAlarm ? 1 : 0, WiFi.RSSI(), seconds,
         (sportAvailable ? sportSteps : 0), (sportAvailable ? sportDistanceKm * 1000.0f : 0.0f), (sportAvailable ? sportCalories : 0.0f));
     mqtt.publish("attributes", json);
     Serial.printf("[MQTT] Sent: %s\n", json);

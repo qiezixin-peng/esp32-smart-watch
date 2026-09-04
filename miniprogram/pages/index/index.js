@@ -7,6 +7,7 @@ Page({
     noData: false,
     latest: null,       // 最新一条数据
     summary: {},        // 概览卡片字段
+    alarm: false,       // 心率/血氧异常预警（alarm=1 弹红色预警条）
     db: null
   },
 
@@ -52,7 +53,11 @@ Page({
             spo2: r.spo2 != null ? Math.round(r.spo2) : '--',
             uv: r.uv != null ? r.uv.toFixed(1) : '--',
             rssi: r.rssi != null ? r.rssi : '--'
-          }
+          },
+          // 心率>150 或 <40、血氧<90 视为异常 → 弹预警（与手表端阈值保持一致）
+          alarm: (r.bpm != null && (r.bpm > 150 || (r.bpm < 40 && r.bpm > 0))) ||
+                 (r.spo2 != null && r.spo2 < 90 && r.spo2 > 0) ||
+                 (r.alarm != null && r.alarm === 1)
         })
       } else {
         this.setData({ loading: false, noData: true })
